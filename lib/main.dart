@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'QuizBrain.dart';
+
 void main() => runApp(Quizzler());
 
 class Quizzler extends StatelessWidget {
@@ -25,6 +27,74 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+  QuizBrain quizBrain = QuizBrain();
+
+  void checkAnswer(bool isTrueButton) {
+    void displayTick(IconData myIcon, Color buttonColor) {
+      setState(() {
+        scoreKeeper.add(
+          Icon(
+            myIcon,
+            color: buttonColor,
+          ),
+        );
+        quizBrain.nextQuestion();
+      });
+    }
+
+    //The user picked true or false.
+    /*
+    * This tries to check for logical equivalence
+    * If the answer picked by the user is equal to the correct answer for that question then display good tick else ...
+    *
+    * First check what button is calling (true button or false button)
+    * If it is the true button then the result can only be correct if th user picked true
+    * */
+    bool correctAnswer = quizBrain.getQuestionAnswer();
+    if (isTrueButton) {
+      if (isTrueButton == correctAnswer) {
+        print('user got it right!');
+        displayTick(Icons.check, Colors.green);
+      } else {
+        print('user got it wrong');
+        displayTick(Icons.close, Colors.red);
+      }
+    } else {
+      if (isTrueButton == correctAnswer) {
+        print('user got it right!');
+        displayTick(Icons.check, Colors.green);
+      } else {
+        print('user got it wrong');
+        displayTick(Icons.close, Colors.red);
+      }
+    }
+  }
+
+  Expanded answerButton(
+      {String text, Color buttonColor, bool isTrueButton, IconData myIcon}) {
+    return Expanded(
+      child: Padding(
+        padding: EdgeInsets.all(15.0),
+        child: FlatButton(
+          textColor: Colors.white,
+          color: buttonColor,
+          child: Text(
+            text,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20.0,
+            ),
+          ),
+          onPressed: () {
+            checkAnswer(isTrueButton);
+          },
+        ),
+      ),
+    );
+  }
+
+  List<Icon> scoreKeeper = [];
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -37,7 +107,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                'This is where the question text will go.',
+                quizBrain.getQuestion(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -47,44 +117,19 @@ class _QuizPageState extends State<QuizPage> {
             ),
           ),
         ),
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.all(15.0),
-            child: FlatButton(
-              textColor: Colors.white,
-              color: Colors.green,
-              child: Text(
-                'True',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20.0,
-                ),
-              ),
-              onPressed: () {
-                //The user picked true.
-              },
-            ),
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.all(15.0),
-            child: FlatButton(
-              color: Colors.red,
-              child: Text(
-                'False',
-                style: TextStyle(
-                  fontSize: 20.0,
-                  color: Colors.white,
-                ),
-              ),
-              onPressed: () {
-                //The user picked false.
-              },
-            ),
-          ),
-        ),
-        //TODO: Add a Row here as your score keeper
+        answerButton(
+            text: 'True',
+            buttonColor: Colors.green,
+            isTrueButton: true,
+            myIcon: Icons.check),
+        answerButton(
+            text: 'False',
+            buttonColor: Colors.red,
+            isTrueButton: false,
+            myIcon: Icons.close),
+        Row(
+          children: scoreKeeper,
+        )
       ],
     );
   }
